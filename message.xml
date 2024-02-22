@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<telegramMessages>
+    <message key="start">
+        <sender>bot</sender>
+        <text>"Привет, {name}, я бот, использующий нейросети от OpenAI, такие как ChatGPT и Dall-e. Задавай мне вопросы и я постараюсь ответить ☺️"</text>
+    </message>
+    <message key="menu">
+        <sender>bot</sender>
+        <text>"📍 Главное меню"</text>
+    </message>
+</telegramMessages>
