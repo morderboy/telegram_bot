@@ -24,7 +24,6 @@ async def menu(msg : Message):
 @router.callback_query(F.data == "generate_text")
 async def state_gen_text(clbk: CallbackQuery, state: FSMContext):
     await state.set_state(Gen.text_state)
-    await clbk.message.edit_text(message.get_message("gen text"))
     await clbk.message.answer(message.get_message("gen text"), reply_markup=kb.exit_kb)
 
 @router.message(Gen.text_state)
@@ -42,7 +41,6 @@ async def generate_text(msg: Message, state: FSMContext):
 @router.callback_query(F.data == "generate_image")
 async def state_gen_image(clbk: CallbackQuery, state: FSMContext):
     await state.set_state(Gen.image_state)
-    await clbk.message.edit_text(message.get_message("gen image"))
     await clbk.message.answer(message.get_message("gen image"), reply_markup=kb.exit_kb)
 
 @router.message(Gen.image_state)
