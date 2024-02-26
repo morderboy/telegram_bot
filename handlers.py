@@ -4,11 +4,17 @@ from aiogram.filters import Command
 from aiogram import flags
 from aiogram.fsm.context import FSMContext
 
+from yoomoney import Quickpay
+import asyncio
+
 import message
 import kb
 import utils
 from states import Gen
 from loader import db
+import config
+import uuid
+import payment
 
 router = Router()
 
@@ -63,4 +69,20 @@ async def help(clbk: CallbackQuery):
 
 @router.callback_query(F.data == "buy_tokens")
 async def buy_tokens(clbk: CallbackQuery):
-    await db.add_user(clbk.from_user.id, clbk.from_user.username, 10)
+    label = str(uuid.uuid4())
+    quickpay = Quickpay(
+            receiver=config.get_yoomoney_account_number(),
+            quickpay_form="shop",
+            targets="Sponsor this project",
+            paymentType="SB",
+            sum=2,
+            label=label
+            )
+    await clbk.message.answer(quickpay.redirected_url)
+
+    try:
+        await asyncio.wait_for(payment.payment_check(label=label), 12*60)
+    except asyncio.TimeoutError:
+        await clbk.message.answer("Где деньги либовски?")
+
+    db.add_user(user_id=clbk.from_user.id, username=clbk.from_user.username, tokens=2)

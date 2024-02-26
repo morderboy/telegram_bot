@@ -22,3 +22,26 @@ def get_ConnString() -> dict:
             "host": c_list[3]
         }
         return result_dict
+
+def get_yoomoney_tokens() -> dict:
+    with open("config.json") as file:
+        con_str = json.load(file)
+        client_id_str = con_str["client_id"]
+        redirect_uri_str = con_str["redirect_uri"]
+        client_secret = con_str["client_secret"]
+        result_dict = {
+            "client_id": client_id_str,
+            "redirect_uri": redirect_uri_str,
+            "client_secret": client_secret
+        }
+        return result_dict
+    
+def get_yoomoney_access_token():
+    with open("config.json") as file:
+        con_str = json.load(file)
+        return con_str["yoomoney_access_token"]
+
+def get_yoomoney_account_number():
+    with open("config.json") as file:
+        con_str = json.load(file)
+        return con_str["yoomoney_account_number"]
