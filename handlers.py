@@ -8,6 +8,7 @@ import message
 import kb
 import utils
 from states import Gen
+from loader import db
 
 router = Router()
 
@@ -55,3 +56,11 @@ async def generate_image(msg: Message, state: FSMContext):
     
     await mesg.delete()
     await mesg.answer_photo(photo=res[0], caption=message.get_message("img watermark"))
+
+@router.callback_query(F.data == "help")
+async def help(clbk: CallbackQuery):
+    await clbk.message.answer(message.get_message("help"))
+
+@router.callback_query(F.data == "buy_tokens")
+async def buy_tokens(clbk: CallbackQuery):
+    await db.add_user(clbk.from_user.id, clbk.from_user.username, 10)
