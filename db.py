@@ -1,5 +1,4 @@
 import asyncpg
-import asyncio
 import config
 
 class Database:

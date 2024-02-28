@@ -7,6 +7,7 @@ client = Client(token)
 
 async def payment_check(label: str):
     while True:
+        print("waiting: {}".format(label))
         history = client.operation_history(label=label)
         oper = None
         for operation in history.operations:

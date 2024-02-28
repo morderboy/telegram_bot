@@ -1,3 +1,5 @@
 \.venv
 \config.json
 \__pycache__
+\payment_server_tests.py
+\server.py

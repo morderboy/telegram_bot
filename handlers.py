@@ -85,4 +85,4 @@ async def buy_tokens(clbk: CallbackQuery):
     except asyncio.TimeoutError:
         await clbk.message.answer("Где деньги либовски?")
 
-    db.add_user(user_id=clbk.from_user.id, username=clbk.from_user.username, tokens=2)
+    await db.add_user(user_id=clbk.from_user.id, username=clbk.from_user.username, tokens=2)

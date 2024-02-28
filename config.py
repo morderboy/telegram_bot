@@ -10,6 +10,11 @@ def get_OpenAIToken():
         token_str = json.load(file)
         return token_str["OpenAI_TOKEN"]
     
+def get_NgrokToken():
+    with open("config.json") as file:
+        token_str = json.load(file)
+        return token_str["NGROK_TOKEN"]
+    
 def get_ConnString() -> dict:
     with open("config.json") as file:
         con_str = json.load(file)
