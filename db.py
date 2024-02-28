@@ -21,4 +21,9 @@ class Database:
             sql = "INSERT INTO users (user_id, username, tokens) VALUES ($1, $2, $3)"
             await connection.execute(sql, user_id, username, tokens)
 
+    async def add_tokens(self, user_id: int, tokens: int):
+        async with self.pool.acquire() as connection:
+            sql = "UPDATE users SET tokens = tokens + $1 WHERE user_id = $2"
+            await connection.execute(sql, tokens, user_id)
+
 

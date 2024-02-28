@@ -10,7 +10,7 @@ import asyncio
 import message
 import kb
 import utils
-from states import Gen
+from states import Gen, Buy
 from loader import db
 import config
 import uuid
@@ -20,6 +20,7 @@ router = Router()
 
 @router.message(Command("start"))
 async def start_handler(msg : Message):
+    await db.add_user(user_id=msg.from_user.id, username=msg.from_user.username, tokens=0)
     await msg.answer(message.get_message("start").format(name=msg.from_user.full_name), reply_markup=kb.menu)
 
 @router.message(F.text == "Меню")
@@ -69,13 +70,14 @@ async def help(clbk: CallbackQuery):
 
 @router.callback_query(F.data == "buy_tokens")
 async def buy_tokens(clbk: CallbackQuery):
+    amount = 2
     label = str(uuid.uuid4())
     quickpay = Quickpay(
             receiver=config.get_yoomoney_account_number(),
             quickpay_form="shop",
             targets="Sponsor this project",
             paymentType="SB",
-            sum=2,
+            sum=amount,
             label=label
             )
     await clbk.message.answer(quickpay.redirected_url)
@@ -85,4 +87,4 @@ async def buy_tokens(clbk: CallbackQuery):
     except asyncio.TimeoutError:
         await clbk.message.answer("Где деньги либовски?")
 
-    await db.add_user(user_id=clbk.from_user.id, username=clbk.from_user.username, tokens=2)
+    await db.add_tokens(user_id=clbk.from_user.id, tokens=amount * 100)
