@@ -26,6 +26,7 @@ async def start_handler(msg : Message):
 @router.message(F.text == "Меню")
 @router.message(F.text == "Выйти в меню")
 @router.message(F.text == "◀️ Выйти в меню")
+@router.message(Command("menu"))
 async def menu(msg : Message, state: FSMContext):
     await state.clear()
     await msg.answer(message.get_message("menu"), reply_markup=kb.menu)
@@ -65,13 +66,17 @@ async def generate_image(msg: Message):
     await mesg.delete()
     await mesg.answer_photo(photo=res[0], caption=message.get_message("img watermark"))
 
+@router.message(Command("help"))
+async def help_command(msg: Message):
+    await msg.answer(message.get_message("help"), reply_markup=kb.exit_kb)
+
 @router.callback_query(F.data == "help")
-async def help(clbk: CallbackQuery):
-    await clbk.message.answer(message.get_message("help"))
+async def help_callback(clbk: CallbackQuery):
+    await clbk.message.answer(message.get_message("help"), reply_markup=kb.exit_kb)
 
 @router.callback_query(F.data == "buy_tokens")
 async def enter_amount(clbk: CallbackQuery, state: FSMContext):
-    await clbk.message.answer(message.get_message("enter amount"))
+    await clbk.message.answer(message.get_message("enter amount"), reply_markup=kb.exit_kb)
     await state.set_state(Buy.chooce_amount)
 
 @router.message(Buy.chooce_amount)
@@ -82,7 +87,7 @@ async def chooce_amount(msg: Message, state: FSMContext):
         await state.set_state(Buy.confirmation)
         await msg.answer("Подтвердите выбор", reply_markup=kb.confirmation_kb)
     except ValueError:
-        await msg.answer("Введити число")
+        await msg.answer("Введити число", reply_markup=kb.exit_kb)
     
 
 @router.message(Buy.confirmation)

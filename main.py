@@ -1,5 +1,4 @@
 import asyncio
-import threading
 import logging
 
 from aiogram import Bot, Dispatcher
@@ -9,9 +8,11 @@ from aiogram.utils.chat_action import ChatActionMiddleware
 
 import config
 from handlers import router, db
+from command_menu import bot_commands
 
 async def main():
     bot = Bot(token=config.get_BotToken(), parse_mode=ParseMode.HTML)
+    await bot.set_my_commands(commands=bot_commands)
     dp = Dispatcher(storage=MemoryStorage())
     dp.include_router(router)
     dp.message.middleware(ChatActionMiddleware())
