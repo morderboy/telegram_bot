@@ -26,7 +26,8 @@ async def start_handler(msg : Message):
 @router.message(F.text == "Меню")
 @router.message(F.text == "Выйти в меню")
 @router.message(F.text == "◀️ Выйти в меню")
-async def menu(msg : Message):
+async def menu(msg : Message, state: FSMContext):
+    await state.clear()
     await msg.answer(message.get_message("menu"), reply_markup=kb.menu)
 
 @router.callback_query(F.data == "generate_text")
@@ -36,7 +37,7 @@ async def state_gen_text(clbk: CallbackQuery, state: FSMContext):
 
 @router.message(Gen.text_state)
 @flags.chat_action("typing")
-async def generate_text(msg: Message, state: FSMContext):
+async def generate_text(msg: Message):
     prompt = msg.text
     mesg = await msg.answer(message.get_message("gen wait"))
     res = await utils.generate_text(prompt=prompt)
@@ -53,7 +54,7 @@ async def state_gen_image(clbk: CallbackQuery, state: FSMContext):
 
 @router.message(Gen.image_state)
 @flags.chat_action("typing")
-async def generate_image(msg: Message, state: FSMContext):
+async def generate_image(msg: Message):
     prompt = msg.text
     mesg = await msg.answer(message.get_message("gen wait"))
     res = await utils.generate_image(prompt=prompt)
@@ -69,8 +70,34 @@ async def help(clbk: CallbackQuery):
     await clbk.message.answer(message.get_message("help"))
 
 @router.callback_query(F.data == "buy_tokens")
-async def buy_tokens(clbk: CallbackQuery):
-    amount = 2
+async def enter_amount(clbk: CallbackQuery, state: FSMContext):
+    await clbk.message.answer(message.get_message("enter amount"))
+    await state.set_state(Buy.chooce_amount)
+
+@router.message(Buy.chooce_amount)
+async def chooce_amount(msg: Message, state: FSMContext):
+    try:
+        num = int(msg.text)
+        await state.update_data(amount=num)
+        await state.set_state(Buy.confirmation)
+        await msg.answer("Подтвердите выбор", reply_markup=kb.confirmation_kb)
+    except ValueError:
+        await msg.answer("Введити число")
+    
+
+@router.message(Buy.confirmation)
+async def confirmation_amount(msg: Message, state: FSMContext):
+    if msg.text == 'Да':
+        await msg.answer("Перейдите по ссылке для оплаты", reply_markup=kb.exit_kb)
+        await buy_tokens(msg=msg, state=state)
+        await state.clear()
+    elif msg.text == 'Нет':
+        await state.set_state(Buy.chooce_amount)
+        await msg.answer("Введите сумму к оплате ещё раз", reply_markup=kb.exit_kb)
+
+async def buy_tokens(msg: Message, state: FSMContext):
+    amount_dict = await state.get_data()
+    amount = amount_dict['amount']
     label = str(uuid.uuid4())
     quickpay = Quickpay(
             receiver=config.get_yoomoney_account_number(),
@@ -80,11 +107,10 @@ async def buy_tokens(clbk: CallbackQuery):
             sum=amount,
             label=label
             )
-    await clbk.message.answer(quickpay.redirected_url)
+    await msg.answer(quickpay.redirected_url)
 
     try:
         await asyncio.wait_for(payment.payment_check(label=label), 12*60)
+        await db.add_tokens(user_id=msg.from_user.id, tokens=amount * 100)
     except asyncio.TimeoutError:
-        await clbk.message.answer("Где деньги либовски?")
-
-    await db.add_tokens(user_id=clbk.from_user.id, tokens=amount * 100)
+        await msg.answer("Где деньги либовски?")

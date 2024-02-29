@@ -6,3 +6,4 @@ class Gen(StatesGroup):
 
 class Buy(StatesGroup):
     chooce_amount = State()
+    confirmation = State()
