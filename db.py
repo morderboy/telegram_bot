@@ -20,11 +20,16 @@ class Database:
         async with self.pool.acquire() as connection:
             sql = str()
             if ref_id:
-                sql = "INSERT INTO users (id, username, tokens, referral) VALUES ($1, $2, $3, $4) ON CONFLICT DO NOTHING RETURNING username"
-                await connection.execute(sql, user_id, username, tokens, ref_id)
+                sql = "INSERT INTO users (id, username, tokens, referral) VALUES ($1, $2, $3, $4) ON CONFLICT DO NOTHING"
+                return await connection.execute(sql, user_id, username, tokens, ref_id)
             else:
                 sql = "INSERT INTO users (id, username, tokens) VALUES ($1, $2, $3) ON CONFLICT DO NOTHING"
                 await connection.execute(sql, user_id, username, tokens)
+
+    async def get_username_by_id(self, user_id: int):
+        async with self.pool.acquire() as connection:
+            sql = "SELECT username FROM users WHERE id = $1"
+            return await connection.fetchrow(sql, user_id)
 
     async def add_tokens(self, user_id: int, tokens: int):
         async with self.pool.acquire() as connection:

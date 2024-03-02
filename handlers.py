@@ -24,10 +24,11 @@ async def start_handler(msg : Message, command: CommandObject):
     args = command.args
     await msg.answer(message.get_message("start").format(name=msg.from_user.full_name), reply_markup=kb.menu)
     if args:
-        ref = decode_payload(args)
-        username = await db.add_user(user_id=msg.from_user.id, username=msg.from_user.username, tokens=0, ref_id=int(ref))
-        if username:
-            await msg.answer(text="Удачно связан с пользователем {}".format(username))
+        ref = int(decode_payload(args))
+        success = await db.add_user(user_id=msg.from_user.id, username=msg.from_user.username, tokens=0, ref_id=ref)
+        if success[-1] == "1":
+            ref_username = await db.get_username_by_id(ref)
+            await msg.answer(text="Удачно связан с пользователем @{}".format(ref_username['username']))
         else:
             await msg.answer(text="Не удалось привязать к пользователю")
     else:
