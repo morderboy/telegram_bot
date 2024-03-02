@@ -46,4 +46,9 @@ class Database:
             sql = "UPDATE orders SET confirmed = True WHERE id = $1"
             await connection.execute(sql, order_id)
 
+    async def get_balance(self, user_id: int):
+        async with self.pool.acquire() as connection:
+            sql = "SELECT tokens FROM users WHERE id = $1"
+            return await connection.fetchval(sql, user_id)
+
 

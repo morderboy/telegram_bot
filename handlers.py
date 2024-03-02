@@ -143,3 +143,13 @@ async def get_ref_link_message(msg: Message):
 async def get_ref_link_callback(clbk: CallbackQuery):
     link = await create_start_link(bot=Bot.get_current(), payload=clbk.from_user.id, encode=True)
     await clbk.message.answer(text=link, reply_markup=kb.exit_kb)
+
+@router.message(Command("balance"))
+async def get_balance_message(msg: Message):
+    balance = await db.get_balance(msg.from_user.id)
+    await msg.answer(message.get_message("show balance").format(balance), reply_markup=kb.exit_kb)
+
+@router.callback_query(F.data == "balance")
+async def get_balance_callback(clbk: CallbackQuery):
+    balance = await db.get_balance(clbk.from_user.id)
+    await clbk.message.answer(message.get_message("show balance").format(balance), reply_markup=kb.exit_kb)
