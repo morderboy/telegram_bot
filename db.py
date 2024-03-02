@@ -39,7 +39,7 @@ class Database:
     async def add_order(self, user_id: int, label: str, amount: int):
         async with self.pool.acquire() as connection:
             sql = "INSERT INTO orders (user_id, label, amount) VALUES ($1, $2, $3) RETURNING id"
-            await connection.execute(sql, user_id, label, amount)
+            return await connection.fetchval(sql, user_id, label, amount)
 
     async def confirm_order(self, order_id: int):
         async with self.pool.acquire() as connection:

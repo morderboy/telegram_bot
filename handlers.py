@@ -125,8 +125,11 @@ async def buy_tokens(msg: Message, state: FSMContext):
             )
     await msg.answer(quickpay.redirected_url)
 
+    order_id = await db.add_order(user_id=msg.from_user.id, label=label, amount=amount)
+
     try:
         await asyncio.wait_for(payment.payment_check(label=label), 12*60)
+        await db.confirm_order(order_id=order_id)
         await db.add_tokens(user_id=msg.from_user.id, tokens=amount * 100)
     except asyncio.TimeoutError:
         await msg.answer("Где деньги либовски?")
