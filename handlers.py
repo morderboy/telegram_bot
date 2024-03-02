@@ -86,6 +86,7 @@ async def generate_image(msg: Message):
     
     await mesg.delete()
     await mesg.answer_photo(photo=res[0], caption=message.get_message("img watermark"))
+    await db.pay_for_gen(msg.from_user.id, 10000)
 
 @router.message(Command("help"))
 @flags.chat_action("typing")
