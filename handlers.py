@@ -134,7 +134,12 @@ async def buy_tokens(msg: Message, state: FSMContext):
     except asyncio.TimeoutError:
         await msg.answer("Где деньги либовски?")
 
+@router.message(Command("ref"))
+async def get_ref_link_message(msg: Message):
+    link = await create_start_link(bot=Bot.get_current(), payload=msg.from_user.id, encode=True)
+    await msg.answer(text=link, reply_markup=kb.exit_kb)
+
 @router.callback_query(F.data == "ref")
-async def get_ref_link(clbk: CallbackQuery):
+async def get_ref_link_callback(clbk: CallbackQuery):
     link = await create_start_link(bot=Bot.get_current(), payload=clbk.from_user.id, encode=True)
     await clbk.message.answer(text=link, reply_markup=kb.exit_kb)
