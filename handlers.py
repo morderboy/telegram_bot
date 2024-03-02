@@ -1,8 +1,9 @@
-from aiogram import F, Router
+from aiogram import F, Router, Bot
 from aiogram.types import Message, CallbackQuery
-from aiogram.filters import Command
+from aiogram.filters import Command, CommandStart, CommandObject
 from aiogram import flags
 from aiogram.fsm.context import FSMContext
+from aiogram.utils.deep_linking import create_start_link, decode_payload
 
 from yoomoney import Quickpay
 import asyncio
@@ -18,10 +19,16 @@ import payment
 
 router = Router()
 
-@router.message(Command("start"))
-async def start_handler(msg : Message):
-    await db.add_user(user_id=msg.from_user.id, username=msg.from_user.username, tokens=0)
+@router.message(CommandStart())
+async def start_handler(msg : Message, command: CommandObject):
+    args = command.args
     await msg.answer(message.get_message("start").format(name=msg.from_user.full_name), reply_markup=kb.menu)
+    if args:
+        ref = decode_payload(args)
+        await db.add_user(user_id=msg.from_user.id, username=msg.from_user.username, tokens=0, ref_id=int(ref))
+        await msg.answer(text="Удачно связан с пользователем")
+    else:
+        await db.add_user(user_id=msg.from_user.id, username=msg.from_user.username, tokens=0)
 
 @router.message(F.text == "Меню")
 @router.message(F.text == "Выйти в меню")
@@ -119,3 +126,8 @@ async def buy_tokens(msg: Message, state: FSMContext):
         await db.add_tokens(user_id=msg.from_user.id, tokens=amount * 100)
     except asyncio.TimeoutError:
         await msg.answer("Где деньги либовски?")
+
+@router.callback_query(F.data == "ref")
+async def get_ref_link(clbk: CallbackQuery):
+    link = await create_start_link(bot=Bot.get_current(), payload=clbk.from_user.id, encode=True)
+    await clbk.message.answer(text=link, reply_markup=kb.exit_kb)

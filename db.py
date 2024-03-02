@@ -16,14 +16,29 @@ class Database:
                 )
             
 
-    async def add_user(self, user_id: int, username: str, tokens: int):
+    async def add_user(self, user_id: int, username: str, tokens: int, ref_id: int = None):
         async with self.pool.acquire() as connection:
-            sql = "INSERT INTO users (user_id, username, tokens) VALUES ($1, $2, $3)"
-            await connection.execute(sql, user_id, username, tokens)
+            sql = str()
+            if ref_id:
+                sql = "INSERT INTO users (id, username, tokens, referral) VALUES ($1, $2, $3, $4) ON CONFLICT DO NOTHING"
+                await connection.execute(sql, user_id, username, tokens, ref_id)
+            else:
+                sql = "INSERT INTO users (id, username, tokens) VALUES ($1, $2, $3) ON CONFLICT DO NOTHING"
+                await connection.execute(sql, user_id, username, tokens)
 
     async def add_tokens(self, user_id: int, tokens: int):
         async with self.pool.acquire() as connection:
-            sql = "UPDATE users SET tokens = tokens + $1 WHERE user_id = $2"
+            sql = "UPDATE users SET tokens = tokens + $1, role = user WHERE user_id = $2"
             await connection.execute(sql, tokens, user_id)
+
+    async def add_order(self, user_id: int, label: str, amount: int):
+        async with self.pool.acquire() as connection:
+            sql = "INSERT INTO orders (user_id, label, amount) VALUES ($1, $2, $3) RETURNING id"
+            await connection.execute(sql, user_id, label, amount)
+
+    async def confirm_order(self, order_id: int):
+        async with self.pool.acquire() as connection:
+            sql = "UPDATE orders SET confirmed = True WHERE id = $1"
+            await connection.execute(sql, order_id)
 
 
