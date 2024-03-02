@@ -78,6 +78,11 @@ async def state_gen_image(clbk: CallbackQuery, state: FSMContext):
 @flags.chat_action("typing")
 async def generate_image(msg: Message):
     prompt = msg.text
+    balance = await db.get_balance(msg.from_user.id)
+
+    if balance < 10000:
+        return await msg.answer(message.get_message("no money").format(10000, balance))
+
     mesg = await msg.answer(message.get_message("gen wait"))
     res = await utils.generate_image(prompt=prompt)
 
