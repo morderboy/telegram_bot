@@ -54,7 +54,7 @@
     </message>
     <message key="free tokens already used">
         <sender>bot</sender>
-        <text>"Вы больше не можете брять бесплатные токены 😞"</text>
+        <text>"Вы больше не можете брать бесплатные токены 😞"</text>
     </message>
     <message key="free tokens give">
         <sender>bot</sender>
