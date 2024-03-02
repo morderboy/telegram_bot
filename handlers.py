@@ -51,13 +51,23 @@ async def state_gen_text(clbk: CallbackQuery, state: FSMContext):
 @flags.chat_action("typing")
 async def generate_text(msg: Message):
     prompt = msg.text
+    balance = await db.get_balance(msg.from_user.id)
+    tokens_count = utils.num_tokens_from_messages(messages=[{"role": "user", "content": prompt}])
+
+    if balance <= tokens_count:
+        return await msg.answer(message.get_message("no money").format(tokens_count, balance), kb.iexit_kb)
+
     mesg = await msg.answer(message.get_message("gen wait"))
     res = await utils.generate_text(prompt=prompt)
 
     if not res:
         return await mesg.edit_text(text=message.get_message("gen error"), reply_markup=kb.iexit_kb)
     
+    if balance < res[1]:
+        return await msg.answer(message.get_message("no money").format(res[1], balance), kb.iexit_kb)
+    
     await mesg.edit_text(res[0] + message.get_message("text watermark"), disable_web_page_preview=True)
+    await db.pay_for_gen(msg.from_user.id, res[1])
 
 @router.callback_query(F.data == "generate_image")
 async def state_gen_image(clbk: CallbackQuery, state: FSMContext):

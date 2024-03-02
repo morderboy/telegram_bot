@@ -56,7 +56,12 @@ class Database:
         async with self.pool.acquire() as connection:
             sql = "SELECT tokens FROM users WHERE id = $1"
             return await connection.fetchval(sql, user_id)
-    
+        
+    async def pay_for_gen(self, user_id: int, tokens: int):
+        async with self.pool.acquire() as connection:
+            sql = "UPDATE users SET tokens = tokens - $2 WHERE id = $1"
+            await connection.execute(sql, user_id, tokens)
+
     async def get_free_token_used(self, user_id:int):
         async with self.pool.acquire() as connection:
             sql = "SELECT free_token_used FROM users WHERE id = $1"
