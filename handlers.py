@@ -78,19 +78,23 @@ async def generate_image(msg: Message):
     await mesg.answer_photo(photo=res[0], caption=message.get_message("img watermark"))
 
 @router.message(Command("help"))
+@flags.chat_action("typing")
 async def help_command(msg: Message):
     await msg.answer(message.get_message("help"), reply_markup=kb.exit_kb)
 
 @router.callback_query(F.data == "help")
+@flags.chat_action("typing")
 async def help_callback(clbk: CallbackQuery):
     await clbk.message.answer(message.get_message("help"), reply_markup=kb.exit_kb)
 
 @router.callback_query(F.data == "buy_tokens")
+@flags.chat_action("typing")
 async def enter_amount(clbk: CallbackQuery, state: FSMContext):
     await clbk.message.answer(message.get_message("enter amount"), reply_markup=kb.exit_kb)
     await state.set_state(Buy.chooce_amount)
 
 @router.message(Buy.chooce_amount)
+@flags.chat_action("typing")
 async def chooce_amount(msg: Message, state: FSMContext):
     try:
         num = int(msg.text)
@@ -135,26 +139,31 @@ async def buy_tokens(msg: Message, state: FSMContext):
         await msg.answer("Где деньги либовски?")
 
 @router.message(Command("ref"))
+@flags.chat_action("typing")
 async def ref_link_message(msg: Message):
     link = await create_start_link(bot=Bot.get_current(), payload=msg.from_user.id, encode=True)
     await msg.answer(text=link, reply_markup=kb.exit_kb)
 
 @router.callback_query(F.data == "ref")
+@flags.chat_action("typing")
 async def ref_link_callback(clbk: CallbackQuery):
     link = await create_start_link(bot=Bot.get_current(), payload=clbk.from_user.id, encode=True)
     await clbk.message.answer(text=link, reply_markup=kb.exit_kb)
 
 @router.message(Command("balance"))
+@flags.chat_action("typing")
 async def balance_message(msg: Message):
     balance = await db.get_balance(msg.from_user.id)
     await msg.answer(message.get_message("show balance").format(balance), reply_markup=kb.exit_kb)
 
 @router.callback_query(F.data == "balance")
+@flags.chat_action("typing")
 async def balance_callback(clbk: CallbackQuery):
     balance = await db.get_balance(clbk.from_user.id)
     await clbk.message.answer(message.get_message("show balance").format(balance), reply_markup=kb.exit_kb)
 
 @router.message(Command("free_tokens"))
+@flags.chat_action("typing")
 async def free_tokens_message(msg: Message):
     if config.get_free_tokens_state():
         user_id = msg.from_user.id
@@ -170,6 +179,7 @@ async def free_tokens_message(msg: Message):
         await msg.answer(message.get_message("no free tokens"), reply_markup=kb.exit_kb)
 
 @router.callback_query(F.data == "free_tokens")
+@flags.chat_action("typing")
 async def free_tokens_callback(clbk: CallbackQuery):
     if config.get_free_tokens_state():
         user_id = clbk.from_user.id
