@@ -135,21 +135,51 @@ async def buy_tokens(msg: Message, state: FSMContext):
         await msg.answer("Где деньги либовски?")
 
 @router.message(Command("ref"))
-async def get_ref_link_message(msg: Message):
+async def ref_link_message(msg: Message):
     link = await create_start_link(bot=Bot.get_current(), payload=msg.from_user.id, encode=True)
     await msg.answer(text=link, reply_markup=kb.exit_kb)
 
 @router.callback_query(F.data == "ref")
-async def get_ref_link_callback(clbk: CallbackQuery):
+async def ref_link_callback(clbk: CallbackQuery):
     link = await create_start_link(bot=Bot.get_current(), payload=clbk.from_user.id, encode=True)
     await clbk.message.answer(text=link, reply_markup=kb.exit_kb)
 
 @router.message(Command("balance"))
-async def get_balance_message(msg: Message):
+async def balance_message(msg: Message):
     balance = await db.get_balance(msg.from_user.id)
     await msg.answer(message.get_message("show balance").format(balance), reply_markup=kb.exit_kb)
 
 @router.callback_query(F.data == "balance")
-async def get_balance_callback(clbk: CallbackQuery):
+async def balance_callback(clbk: CallbackQuery):
     balance = await db.get_balance(clbk.from_user.id)
     await clbk.message.answer(message.get_message("show balance").format(balance), reply_markup=kb.exit_kb)
+
+@router.message(Command("free_tokens"))
+async def free_tokens_message(msg: Message):
+    if config.get_free_tokens_state():
+        user_id = msg.from_user.id
+        is_used = await db.get_free_token_used(user_id)
+        if is_used:
+            await msg.answer(message.get_message("free tokens already used"), reply_markup=kb.exit_kb)
+        else:
+            tokens = config.get_free_tokens_amount()
+            await db.add_tokens(user_id, tokens)
+            await db.set_free_token_used(user_id, True)
+            await msg.answer(message.get_message("free tokens give").format(tokens), reply_markup=kb.exit_kb)
+    else:
+        await msg.answer(message.get_message("no free tokens"), reply_markup=kb.exit_kb)
+
+@router.callback_query(F.data == "free_tokens")
+async def free_tokens_callback(clbk: CallbackQuery):
+    if config.get_free_tokens_state():
+        user_id = clbk.from_user.id
+        is_used = await db.get_free_token_used(user_id)
+        if is_used:
+            await clbk.message.answer(message.get_message("free tokens already used"), reply_markup=kb.exit_kb)
+        else:
+            tokens = config.get_free_tokens_amount()
+            await db.add_tokens(user_id, tokens)
+            await db.set_free_token_used(user_id, True)
+            await clbk.message.answer(message.get_message("free tokens give").format(tokens), reply_markup=kb.exit_kb)
+    else:
+        await clbk.message.answer(message.get_message("no free tokens"), reply_markup=kb.exit_kb)

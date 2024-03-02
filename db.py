@@ -33,8 +33,14 @@ class Database:
 
     async def add_tokens(self, user_id: int, tokens: int):
         async with self.pool.acquire() as connection:
-            sql = "UPDATE users SET tokens = tokens + $1, role = user WHERE user_id = $2"
-            await connection.execute(sql, tokens, user_id)
+            try:
+                async with connection.transaction():
+                    sql1 = "UPDATE users SET tokens = tokens + $1 WHERE id = $2"
+                    sql2 = "UPDATE users SET role = 'user' WHERE id = $1 AND role = 'guest'"
+                    await connection.execute(sql1, tokens, user_id)
+                    await connection.execute(sql2, user_id)
+            except:
+                pass
 
     async def add_order(self, user_id: int, label: str, amount: int):
         async with self.pool.acquire() as connection:
@@ -50,5 +56,15 @@ class Database:
         async with self.pool.acquire() as connection:
             sql = "SELECT tokens FROM users WHERE id = $1"
             return await connection.fetchval(sql, user_id)
+    
+    async def get_free_token_used(self, user_id:int):
+        async with self.pool.acquire() as connection:
+            sql = "SELECT free_token_used FROM users WHERE id = $1"
+            return await connection.fetchval(sql, user_id)
+        
+    async def set_free_token_used(self, user_id:int, free_token_used: bool):
+        async with self.pool.acquire() as connection:
+            sql = "UPDATE users SET free_token_used = $2 WHERE id = $1"
+            await connection.execute(sql, user_id, free_token_used)
 
 

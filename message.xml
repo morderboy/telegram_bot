@@ -50,6 +50,18 @@
     </message>
     <message key="show balance">
         <sender>bot</sender>
-        <text>"Вот количество доступных вам токенов: {}😊"</text>
+        <text>"Вот количество доступных вам токенов: {} 😊"</text>
+    </message>
+    <message key="free tokens already used">
+        <sender>bot</sender>
+        <text>"Вы больше не можете брять бесплатные токены 😞"</text>
+    </message>
+    <message key="free tokens give">
+        <sender>bot</sender>
+        <text>"Вам на счёт зачислено {} бесплатных токенов 😊"</text>
+    </message>
+    <message key="no free tokens">
+        <sender>bot</sender>
+        <text>"Извините, но на данный момент не происходит раздачи бесплатных токенов 😞"</text>
     </message>
 </telegramMessages>
