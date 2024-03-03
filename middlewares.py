@@ -15,9 +15,11 @@ class AdminMiddleware(BaseMiddleware):
             event: TelegramObject,
             data: Dict[str, Any]
             ) -> Any:
-                logger_admin.info(f"Попытка входа в панель администратора: username={event.from_user.username}; id={event.from_user.id}")
                 if event.from_user.id in self.admins:
-                    logger_admin.info(f"Администратор {event.from_user.username} c id {event.from_user.id} вошёл в панель.")
                     return await handler(event, data)
+                elif event.text == "/admin_start":
+                    logger_admin.info(f"Попытка входа в панель администратора не администратором: username={event.from_user.username}; id={event.from_user.id}")
+                else:
+                    pass
                 
 admin_middleware = AdminMiddleware()
