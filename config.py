@@ -56,6 +56,11 @@ def get_yoomoney_account_number():
         con_str = json.load(file)
         return con_str["yoomoney_account_number"]
     
+def get_tokens_per_rub():
+    with open("config.json") as file:
+        con_str = json.load(file)
+        return con_str["tokens_per_rub"]
+
 def get_free_tokens_state():
     with open("config.json") as file:
         con_str = json.load(file)

@@ -162,7 +162,8 @@ async def buy_tokens(msg: Message, state: FSMContext):
         logger.info(f"Оплата успешно подтверждена, order_id: {order_id}")
         await db.confirm_order(order_id=order_id)
         logger.info(f"Заказ с order_id: {order_id} подтверждён в базе данных")
-        await db.add_tokens(user_id=msg.from_user.id, tokens=amount * 100)
+        price = config.get_tokens_per_rub()
+        await db.add_tokens(user_id=msg.from_user.id, tokens=amount * price)
         logger.info(f"Пользователю {msg.from_user.username} были начисленны токены")
     except asyncio.TimeoutError:
         await msg.answer("Где деньги либовски?")
