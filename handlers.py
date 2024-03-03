@@ -82,7 +82,7 @@ async def generate_image(msg: Message):
     price = config.get_img_gen_price()
 
     if balance < price:
-        return await msg.answer(message.get_message("no money").format(10000, balance))
+        return await msg.answer(message.get_message("no money").format(price, balance))
 
     mesg = await msg.answer(message.get_message("gen wait"))
     res = await utils.generate_image(prompt=prompt)
