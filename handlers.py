@@ -96,7 +96,7 @@ async def generate_image(msg: Message):
 
 @router.message(Command("help"))
 @flags.chat_action("typing")
-async def help_command(msg: Message):
+async def help_message(msg: Message):
     await msg.answer(message.get_message("help"), reply_markup=kb.exit_kb)
 
 @router.callback_query(F.data == "help")
