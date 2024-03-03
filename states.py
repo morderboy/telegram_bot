@@ -9,6 +9,7 @@ class Buy(StatesGroup):
     confirmation = State()
 
 class Admin(StatesGroup):
+    start = State()
     enter_id = State()
     enter_amount = State()
     confirm = State()
