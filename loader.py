@@ -4,16 +4,30 @@ import logging
 #db
 db = Database()
 
-#logger
-file_handler = logging.FileHandler(filename='logs\log.txt', encoding='utf-8')
-console_handler = logging.StreamHandler()
+#logger for users
+file_handler = logging.FileHandler(filename='logs\log_users.txt', encoding='utf-8')
 
 file_handler.setLevel(logging.INFO)
-console_handler.setLevel(logging.INFO)
 
 file_format = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
 file_handler.setFormatter(file_format)
 
-logger = logging.getLogger(__name__)
+logger = logging.getLogger("users")
+logger.propagate = False
+if logger.hasHandlers():
+    logger.handlers = []
 logger.addHandler(file_handler)
-logger.addHandler(console_handler)
+
+#logger for admins
+file_handler_admin = logging.FileHandler(filename='logs\log_admins.txt', encoding='utf-8')
+
+file_handler_admin.setLevel(logging.INFO)
+
+file_format_admin = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
+file_handler_admin.setFormatter(file_format)
+
+logger_admin = logging.getLogger("admin")
+logger.propagate = False
+if logger.hasHandlers():
+    logger.handlers = []
+logger_admin.addHandler(file_handler_admin)

@@ -8,12 +8,14 @@ from aiogram.utils.chat_action import ChatActionMiddleware
 
 import config
 from handlers import user_router, db
+from admin import admin_router
 from command_menu import bot_commands
 
 async def main():
     bot = Bot(token=config.get_BotToken(), parse_mode=ParseMode.HTML)
     await bot.set_my_commands(commands=bot_commands)
     dp = Dispatcher(storage=MemoryStorage())
+    dp.include_router(admin_router)
     dp.include_router(user_router)
     dp.message.middleware(ChatActionMiddleware())
     await db.pre_process()
