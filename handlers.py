@@ -17,9 +17,9 @@ import config
 import uuid
 import payment
 
-router = Router()
+user_router = Router(name="user")
 
-@router.message(CommandStart())
+@user_router.message(CommandStart())
 async def start_handler(msg : Message, command: CommandObject):
     args = command.args
     await msg.answer(message.get_message("start").format(name=msg.from_user.full_name), reply_markup=kb.menu)
@@ -34,20 +34,20 @@ async def start_handler(msg : Message, command: CommandObject):
     else:
         await db.add_user(user_id=msg.from_user.id, username=msg.from_user.username, tokens=0)
 
-@router.message(F.text == "Меню")
-@router.message(F.text == "Выйти в меню")
-@router.message(F.text == "◀️ Выйти в меню")
-@router.message(Command("menu"))
+@user_router.message(F.text == "Меню")
+@user_router.message(F.text == "Выйти в меню")
+@user_router.message(F.text == "◀️ Выйти в меню")
+@user_router.message(Command("menu"))
 async def menu(msg : Message, state: FSMContext):
     await state.clear()
     await msg.answer(message.get_message("menu"), reply_markup=kb.menu)
 
-@router.callback_query(F.data == "generate_text")
+@user_router.callback_query(F.data == "generate_text")
 async def state_gen_text(clbk: CallbackQuery, state: FSMContext):
     await state.set_state(Gen.text_state)
     await clbk.message.answer(message.get_message("gen text"), reply_markup=kb.exit_kb)
 
-@router.message(Gen.text_state)
+@user_router.message(Gen.text_state)
 @flags.chat_action("typing")
 async def generate_text(msg: Message):
     prompt = msg.text
@@ -74,12 +74,12 @@ async def generate_text(msg: Message):
     await db.pay_for_gen(msg.from_user.id, res[1])
     logger.info(f"TEXT_GEN: Cо счета пользователя {msg.from_user.username} было снято {res[1]}")
 
-@router.callback_query(F.data == "generate_image")
+@user_router.callback_query(F.data == "generate_image")
 async def state_gen_image(clbk: CallbackQuery, state: FSMContext):
     await state.set_state(Gen.image_state)
     await clbk.message.answer(message.get_message("gen image"), reply_markup=kb.exit_kb)
 
-@router.message(Gen.image_state)
+@user_router.message(Gen.image_state)
 @flags.chat_action("typing")
 async def generate_image(msg: Message):
     prompt = msg.text
@@ -100,23 +100,23 @@ async def generate_image(msg: Message):
     await db.pay_for_gen(msg.from_user.id, price)
     logger.info(f"IMG_GEN: Cо счета пользователя {msg.from_user.username} было снято {price}")
 
-@router.message(Command("help"))
+@user_router.message(Command("help"))
 @flags.chat_action("typing")
 async def help_message(msg: Message):
     await msg.answer(message.get_message("help"), reply_markup=kb.exit_kb)
 
-@router.callback_query(F.data == "help")
+@user_router.callback_query(F.data == "help")
 @flags.chat_action("typing")
 async def help_callback(clbk: CallbackQuery):
     await clbk.message.answer(message.get_message("help"), reply_markup=kb.exit_kb)
 
-@router.callback_query(F.data == "buy_tokens")
+@user_router.callback_query(F.data == "buy_tokens")
 @flags.chat_action("typing")
 async def enter_amount(clbk: CallbackQuery, state: FSMContext):
     await clbk.message.answer(message.get_message("enter amount"), reply_markup=kb.exit_kb)
     await state.set_state(Buy.chooce_amount)
 
-@router.message(Buy.chooce_amount)
+@user_router.message(Buy.chooce_amount)
 @flags.chat_action("typing")
 async def chooce_amount(msg: Message, state: FSMContext):
     try:
@@ -128,7 +128,7 @@ async def chooce_amount(msg: Message, state: FSMContext):
         await msg.answer("Введити число", reply_markup=kb.exit_kb)
     
 
-@router.message(Buy.confirmation)
+@user_router.message(Buy.confirmation)
 async def confirmation_amount(msg: Message, state: FSMContext):
     if msg.text == 'Да':
         await msg.answer("Перейдите по ссылке для оплаты", reply_markup=kb.exit_kb)
@@ -168,31 +168,31 @@ async def buy_tokens(msg: Message, state: FSMContext):
         await msg.answer("Где деньги либовски?")
         logger.warning(f"Оплата не была произведена в течение ожидаемого времени, order_id: {order_id}")
 
-@router.message(Command("ref"))
+@user_router.message(Command("ref"))
 @flags.chat_action("typing")
 async def ref_link_message(msg: Message):
     link = await create_start_link(bot=Bot.get_current(), payload=msg.from_user.id, encode=True)
     await msg.answer(text=link, reply_markup=kb.exit_kb)
 
-@router.callback_query(F.data == "ref")
+@user_router.callback_query(F.data == "ref")
 @flags.chat_action("typing")
 async def ref_link_callback(clbk: CallbackQuery):
     link = await create_start_link(bot=Bot.get_current(), payload=clbk.from_user.id, encode=True)
     await clbk.message.answer(text=link, reply_markup=kb.exit_kb)
 
-@router.message(Command("balance"))
+@user_router.message(Command("balance"))
 @flags.chat_action("typing")
 async def balance_message(msg: Message):
     balance = await db.get_balance(msg.from_user.id)
     await msg.answer(message.get_message("show balance").format(balance), reply_markup=kb.exit_kb)
 
-@router.callback_query(F.data == "balance")
+@user_router.callback_query(F.data == "balance")
 @flags.chat_action("typing")
 async def balance_callback(clbk: CallbackQuery):
     balance = await db.get_balance(clbk.from_user.id)
     await clbk.message.answer(message.get_message("show balance").format(balance), reply_markup=kb.exit_kb)
 
-@router.message(Command("free_tokens"))
+@user_router.message(Command("free_tokens"))
 @flags.chat_action("typing")
 async def free_tokens_message(msg: Message):
     if config.get_free_tokens_state():
@@ -208,7 +208,7 @@ async def free_tokens_message(msg: Message):
     else:
         await msg.answer(message.get_message("no free tokens"), reply_markup=kb.exit_kb)
 
-@router.callback_query(F.data == "free_tokens")
+@user_router.callback_query(F.data == "free_tokens")
 @flags.chat_action("typing")
 async def free_tokens_callback(clbk: CallbackQuery):
     if config.get_free_tokens_state():
