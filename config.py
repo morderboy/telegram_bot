@@ -1,5 +1,10 @@
 import json
 
+def get_by_string(token: str):
+    with open("config.json") as file:
+        json_file = json.load(file)
+        return json_file[token]
+
 def get_BotToken():
     with open("config.json") as file:
         token_str = json.load(file)
@@ -60,3 +65,8 @@ def get_free_tokens_amount():
     with open("config.json") as file:
         con_str = json.load(file)
         return con_str["free_tokens_amount"]
+    
+def get_img_gen_price():
+    with open("config.json") as file:
+        con_str = json.load(file)
+        return con_str["img_gen_price"]

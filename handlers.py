@@ -79,8 +79,9 @@ async def state_gen_image(clbk: CallbackQuery, state: FSMContext):
 async def generate_image(msg: Message):
     prompt = msg.text
     balance = await db.get_balance(msg.from_user.id)
+    price = config.get_img_gen_price()
 
-    if balance < 10000:
+    if balance < price:
         return await msg.answer(message.get_message("no money").format(10000, balance))
 
     mesg = await msg.answer(message.get_message("gen wait"))
@@ -91,7 +92,7 @@ async def generate_image(msg: Message):
     
     await mesg.delete()
     await mesg.answer_photo(photo=res[0], caption=message.get_message("img watermark"))
-    await db.pay_for_gen(msg.from_user.id, 10000)
+    await db.pay_for_gen(msg.from_user.id, price)
 
 @router.message(Command("help"))
 @flags.chat_action("typing")
