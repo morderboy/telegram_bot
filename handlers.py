@@ -72,6 +72,7 @@ async def generate_text(msg: Message):
     
     await mesg.edit_text(res[0] + message.get_message("text watermark"), disable_web_page_preview=True)
     await db.pay_for_gen(msg.from_user.id, res[1])
+    logger.info(f"TEXT_GEN: Cо счета пользователя {msg.from_user.username} было снято {res[1]}")
 
 @router.callback_query(F.data == "generate_image")
 async def state_gen_image(clbk: CallbackQuery, state: FSMContext):
@@ -97,6 +98,7 @@ async def generate_image(msg: Message):
     await mesg.delete()
     await mesg.answer_photo(photo=res[0], caption=message.get_message("img watermark"))
     await db.pay_for_gen(msg.from_user.id, price)
+    logger.info(f"IMG_GEN: Cо счета пользователя {msg.from_user.username} было снято {price}")
 
 @router.message(Command("help"))
 @flags.chat_action("typing")
