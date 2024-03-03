@@ -12,7 +12,7 @@ import message
 import kb
 import utils
 from states import Gen, Buy
-from loader import db
+from loader import db, logger
 import config
 import uuid
 import payment
@@ -133,6 +133,7 @@ async def confirmation_amount(msg: Message, state: FSMContext):
         await msg.answer("Введите сумму к оплате ещё раз", reply_markup=kb.exit_kb)
 
 async def buy_tokens(msg: Message, state: FSMContext):
+    logger.info(f"Начало обработки покупки токенов пользователем: {msg.from_user.username}")
     amount_dict = await state.get_data()
     amount = amount_dict['amount']
     label = str(uuid.uuid4())
@@ -145,15 +146,21 @@ async def buy_tokens(msg: Message, state: FSMContext):
             label=label
             )
     await msg.answer(quickpay.redirected_url)
+    logger.info(f"URL оплаты отправлен, label: {label}, amount: {amount} руб.")
 
     order_id = await db.add_order(user_id=msg.from_user.id, label=label, amount=amount)
+    logger.info(f"Заказ добавлен в базу данных, order_id: {order_id}")
 
     try:
         await asyncio.wait_for(payment.payment_check(label=label), 12*60)
+        logger.info(f"Оплата успешно подтверждена, order_id: {order_id}")
         await db.confirm_order(order_id=order_id)
+        logger.info(f"Заказ с order_id: {order_id} подтверждён в базе данных")
         await db.add_tokens(user_id=msg.from_user.id, tokens=amount * 100)
+        logger.info(f"Пользователю {msg.from_user.username} были начисленны токены")
     except asyncio.TimeoutError:
         await msg.answer("Где деньги либовски?")
+        logger.warning(f"Оплата не была произведена в течение ожидаемого времени, order_id: {order_id}")
 
 @router.message(Command("ref"))
 @flags.chat_action("typing")
