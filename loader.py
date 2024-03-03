@@ -13,9 +13,6 @@ file_format = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(mess
 file_handler.setFormatter(file_format)
 
 logger = logging.getLogger("users")
-logger.propagate = False
-if logger.hasHandlers():
-    logger.handlers = []
 logger.addHandler(file_handler)
 
 #logger for admins
@@ -27,7 +24,4 @@ file_format_admin = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - 
 file_handler_admin.setFormatter(file_format)
 
 logger_admin = logging.getLogger("admin")
-logger.propagate = False
-if logger.hasHandlers():
-    logger.handlers = []
 logger_admin.addHandler(file_handler_admin)
