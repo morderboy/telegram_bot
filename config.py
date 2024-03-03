@@ -70,3 +70,8 @@ def get_img_gen_price():
     with open("config.json") as file:
         con_str = json.load(file)
         return con_str["img_gen_price"]
+    
+def get_admin_ids():
+    with open("config.json") as file:
+        con_str = json.load(file)
+        return con_str["admins"]
