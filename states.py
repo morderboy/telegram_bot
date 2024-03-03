@@ -7,3 +7,8 @@ class Gen(StatesGroup):
 class Buy(StatesGroup):
     chooce_amount = State()
     confirmation = State()
+
+class Admin(StatesGroup):
+    enter_id = State()
+    enter_amount = State()
+    confirm = State()
