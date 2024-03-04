@@ -160,13 +160,19 @@ async def buy_tokens(msg: Message, state: FSMContext):
     try:
         await asyncio.wait_for(payment.payment_check(label=label), 12*60)
         logger.info(f"Оплата успешно подтверждена, order_id: {order_id}")
+
         await db.confirm_order(order_id=order_id)
         logger.info(f"Заказ с order_id: {order_id} подтверждён в базе данных")
+
         price = config.get_tokens_per_rub()
         await db.add_tokens(user_id=msg.from_user.id, tokens=amount * price)
         logger.info(f"Пользователю {msg.from_user.username} были начисленны токены")
+
+        referrer_id = await db.get_referrer_id(msg.from_user.id)
+        if referrer_id:
+            await db.add_tokens(user_id=referrer_id, tokens=amount * price * config.get_referral_percent())
     except asyncio.TimeoutError:
-        await msg.answer("Где деньги либовски?")
+        await msg.answer("Время оплаты вышло, попробуйте ещё раз", reply_markup=kb.menu)
         logger.warning(f"Оплата не была произведена в течение ожидаемого времени, order_id: {order_id}")
 
 @user_router.message(Command("ref"))
