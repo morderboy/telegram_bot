@@ -3,9 +3,7 @@ from aiogram import F, Router
 from aiogram.fsm.context import FSMContext
 from aiogram.types import Message, CallbackQuery
 
-import uuid
-
-from middlewares import admin_middleware, logger_admin
+from middlewares import admin_middleware, logger_admin, banlist
 from states import Admin
 from kb import menu_admin, confirmation_kb
 from loader import db
@@ -92,3 +90,27 @@ async def order_confirm_enter_label(msg: Message, state: FSMContext):
     
     logger_admin.info(f"Aдмин {msg.from_user.username} провёл платёж с меткой {msg.text}")
     await msg.answer("Токены добавленны", reply_markup=menu_admin)
+
+@admin_router.message(Command("ban"))
+async def ban_start(msg: Message, state: FSMContext):
+    await msg.answer("Введите id пользователя которого хотите забанить")
+    await state.set_state(Admin.ban)
+
+@admin_router.message(Admin.ban)
+async def ban_add_to_banlist(msg: Message, state: FSMContext):
+    await state.clear()
+    try:
+        id = int(msg.text)
+    except ValueError:
+        await state.set_state(Admin.ban)
+        return await msg.answer("Введите число")
+
+    user_record = await db.get_username_by_id(id)
+    if user_record:
+        username = user_record["username"]
+        banlist.add(id)
+        logger_admin.info(f"Админ {msg.from_user.username} забанил пользователя {username}")
+        await msg.answer(f"Пользователь {username} c id {id} добавлен в банлист")
+    else:
+        await msg.answer("Пользователя с таким id нет в базе")
+    

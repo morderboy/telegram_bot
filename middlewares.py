@@ -3,7 +3,7 @@ from aiogram import BaseMiddleware
 from aiogram.types import TelegramObject
 
 import config
-from loader import logger_admin
+from loader import logger_admin, banlist
 
 class AdminMiddleware(BaseMiddleware):
     def __init__(self)-> None:
@@ -32,11 +32,10 @@ class BanlistMiddleware(BaseMiddleware):
         event: TelegramObject,
         data: Dict[str, Any]
     ) -> Any:
-         banlist = config.get_banlist_ids()
          if event.from_user.id in banlist:
-              await event.answer("Вы забанены")
+            await event.answer("Вы забанены")
          else:
-              return await handler(event, data)
+            return await handler(event, data)
                 
 admin_middleware = AdminMiddleware()
 banlist_middleware = BanlistMiddleware()

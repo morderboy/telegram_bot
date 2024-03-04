@@ -1,8 +1,12 @@
 from db import Database
+from config import get_banlist_ids
 import logging
 
 #db
 db = Database()
+
+#banlist
+banlist: set[int] = set(get_banlist_ids())
 
 #logger for users
 file_handler = logging.FileHandler(filename='logs\log_users.txt', encoding='utf-8')

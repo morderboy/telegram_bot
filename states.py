@@ -14,3 +14,4 @@ class Admin(StatesGroup):
     confirm_token = State()
     enter_label = State()
     confirm_order = State()
+    ban = State()

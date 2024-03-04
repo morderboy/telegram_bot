@@ -16,7 +16,7 @@ class Database:
                 )
             
 
-    async def add_user(self, user_id: int, username: str, tokens: int, ref_id: int = None):
+    async def add_user(self, user_id: int, username: str, tokens: int, ref_id: int = None) -> str:
         async with self.pool.acquire() as connection:
             sql = str()
             if ref_id:
@@ -26,7 +26,7 @@ class Database:
                 sql = "INSERT INTO users (id, username, tokens) VALUES ($1, $2, $3) ON CONFLICT DO NOTHING"
                 await connection.execute(sql, user_id, username, tokens)
 
-    async def get_username_by_id(self, user_id: int):
+    async def get_username_by_id(self, user_id: int) -> str:
         async with self.pool.acquire() as connection:
             sql = "SELECT username FROM users WHERE id = $1"
             return await connection.fetchrow(sql, user_id)
@@ -36,7 +36,7 @@ class Database:
             sql = "SELECT u2.id FROM users u1 JOIN users u2 ON u1.referral = u2.id WHERE u1.id = $1"
             return await connection.fetchval(sql, user_id)
 
-    async def add_tokens(self, user_id: int, tokens: int):
+    async def add_tokens(self, user_id: int, tokens: int) -> None:
         async with self.pool.acquire() as connection:
             try:
                 async with connection.transaction():
@@ -57,7 +57,7 @@ class Database:
             sql = "SELECT confirmed FROM orders WHERE label = $1"
             return await connection.fetchval(sql, label)
 
-    async def confirm_order(self, order_id: int):
+    async def confirm_order(self, order_id: int) -> None:
         async with self.pool.acquire() as connection:
             sql = "UPDATE orders SET confirmed = True WHERE id = $1"
             await connection.execute(sql, order_id)
@@ -79,7 +79,7 @@ class Database:
             sql = "SELECT tokens FROM users WHERE id = $1"
             return await connection.fetchval(sql, user_id)
         
-    async def pay_for_gen(self, user_id: int, tokens: int):
+    async def pay_for_gen(self, user_id: int, tokens: int) -> None:
         async with self.pool.acquire() as connection:
             sql = "UPDATE users SET tokens = tokens - $2 WHERE id = $1"
             await connection.execute(sql, user_id, tokens)
@@ -89,7 +89,7 @@ class Database:
             sql = "SELECT free_token_used FROM users WHERE id = $1"
             return await connection.fetchval(sql, user_id)
         
-    async def set_free_token_used(self, user_id:int, free_token_used: bool):
+    async def set_free_token_used(self, user_id:int, free_token_used: bool) -> None:
         async with self.pool.acquire() as connection:
             sql = "UPDATE users SET free_token_used = $2 WHERE id = $1"
             await connection.execute(sql, user_id, free_token_used)

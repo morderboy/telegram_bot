@@ -90,3 +90,10 @@ def get_banlist_ids():
     with open("config.json") as file:
         con_str = json.load(file)
         return con_str["banlist"]
+    
+def update_banlist_id(banlist: list[int]):
+    with open("config.json", "r+") as file:
+        con_str = json.load(file)
+        con_str["banlist"] = banlist
+        file.seek(0)
+        json.dump(con_str, file, indent=1)
