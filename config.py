@@ -85,3 +85,8 @@ def get_admin_ids():
     with open("config.json") as file:
         con_str = json.load(file)
         return con_str["admins"]
+    
+def get_banlist_ids():
+    with open("config.json") as file:
+        con_str = json.load(file)
+        return con_str["banlist"]
