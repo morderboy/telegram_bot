@@ -68,7 +68,7 @@ async def add_tokens(msg: Message, state: FSMContext):
         await state.set_state(Admin.start)
 
         await db.add_tokens(user_id=id, tokens=tokens)
-        logger_admin.info(f"Администратор {msg.from_user.username} добавил {tokens} пользователю с id {id}")
+        logger_admin.info(f"Администратор {msg.from_user.username} добавил {tokens} токенов пользователю с id {id}")
         await msg.answer(f"Добавлено токенов: {tokens}", reply_markup=menu_admin)
     else:
         await state.clear()
