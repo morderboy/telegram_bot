@@ -51,11 +51,28 @@ class Database:
         async with self.pool.acquire() as connection:
             sql = "INSERT INTO orders (user_id, label, amount) VALUES ($1, $2, $3) RETURNING id"
             return await connection.fetchval(sql, user_id, label, amount)
+        
+    async def is_order_confirmed_label(self, label: str) -> bool:
+        async with self.pool.acquire() as connection:
+            sql = "SELECT confirmed FROM orders WHERE label = $1"
+            return await connection.fetchval(sql, label)
 
     async def confirm_order(self, order_id: int):
         async with self.pool.acquire() as connection:
             sql = "UPDATE orders SET confirmed = True WHERE id = $1"
             await connection.execute(sql, order_id)
+
+    async def confirm_order_and_add_tokens(self, label: str):
+        async with self.pool.acquire() as connection:
+            try:
+                token_per_rub = config.get_tokens_per_rub()
+                async with connection.transaction():
+                    sql1 = "UPDATE orders SET confirmed = True WHERE label = $1 RETURNING (user_id, amount)"
+                    sql2 = "UPDATE users SET tokens = tokens + $1 WHERE id = $2"
+                    id_amount = await connection.fetchval(sql1, label)
+                    return await connection.execute(sql2, id_amount[1] * token_per_rub, id_amount[0])
+            except:
+                return "0"
 
     async def get_balance(self, user_id: int) -> int:
         async with self.pool.acquire() as connection:

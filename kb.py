@@ -13,7 +13,8 @@ menu = [
 
 menu_admin = [
     [InlineKeyboardButton(text="Добавить токенов пользователю", callback_data="admin_tokens_add"),
-    InlineKeyboardButton(text="Выйти из панели администратора", callback_data="exit_admin")]
+    InlineKeyboardButton(text="Подтвердить платёж", callback_data="admin_order_confirm")],
+    [InlineKeyboardButton(text="Выйти из панели администратора", callback_data="exit_admin")]
 ]
 
 menu = InlineKeyboardMarkup(inline_keyboard=menu)

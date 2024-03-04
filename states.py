@@ -9,7 +9,8 @@ class Buy(StatesGroup):
     confirmation = State()
 
 class Admin(StatesGroup):
-    start = State()
     enter_id = State()
     enter_amount = State()
-    confirm = State()
+    confirm_token = State()
+    enter_label = State()
+    confirm_order = State()
