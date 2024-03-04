@@ -18,7 +18,6 @@ admin_router.callback_query.outer_middleware(admin_middleware)
 @admin_router.message(Command("admin_start"))
 async def admin_start(msg: Message, state: FSMContext):
     await state.clear()
-    logger_admin.info(f"Администратор {msg.from_user.username} зашёл в панель")
     await msg.answer(f"Привет админ: {msg.from_user.username}", reply_markup=menu_admin)
 
 @admin_router.callback_query(F.data == "exit_admin")
