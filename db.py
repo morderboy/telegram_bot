@@ -62,7 +62,7 @@ class Database:
             sql = "UPDATE orders SET confirmed = True WHERE id = $1"
             await connection.execute(sql, order_id)
 
-    async def confirm_order_and_add_tokens(self, label: str):
+    async def confirm_order_and_add_tokens(self, label: str) -> str:
         async with self.pool.acquire() as connection:
             try:
                 token_per_rub = config.get_tokens_per_rub()
