@@ -71,6 +71,11 @@ def get_free_tokens_amount():
         con_str = json.load(file)
         return con_str["free_tokens_amount"]
     
+def get_referral_percent():
+    with open("config.json") as file:
+        con_str = json.load(file)
+        return con_str["referral_percent"]
+
 def get_img_gen_price():
     with open("config.json") as file:
         con_str = json.load(file)
