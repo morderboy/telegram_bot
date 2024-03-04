@@ -31,7 +31,7 @@ class Database:
             sql = "SELECT username FROM users WHERE id = $1"
             return await connection.fetchrow(sql, user_id)
         
-    async def get_user_referrer_id(self, user_id: int) -> int:
+    async def get_referrer_id(self, user_id: int) -> int:
         async with self.pool.acquire() as connection:
             sql = "SELECT u2.id FROM users u1 JOIN users u2 ON u1.referral = u2.id WHERE u1.id = $1"
             return await connection.fetchval(sql, user_id)
