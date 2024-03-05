@@ -96,4 +96,5 @@ def update_banlist_id(banlist: list[int]):
         con_str = json.load(file)
         con_str["banlist"] = banlist
         file.seek(0)
+        file.truncate()
         json.dump(con_str, file, indent=1)
