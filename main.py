@@ -1,6 +1,5 @@
 import asyncio
 import logging
-import signal
 
 from aiogram import Bot, Dispatcher
 from aiogram.enums.parse_mode import ParseMode

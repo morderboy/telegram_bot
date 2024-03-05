@@ -1,6 +1,12 @@
+import logging
+import os
+
 from db import Database
 from config import get_banlist_ids
-import logging
+
+current_directory = os.getcwd()
+new_directory = os.path.join(current_directory, 'logs')
+os.makedirs(new_directory, exist_ok=True)
 
 #db
 db = Database()
