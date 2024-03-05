@@ -15,6 +15,40 @@ class Database:
                     host=conn_str["host"]
                 )
             
+    async def on_startup(self):
+        async with self.pool.acquire() as connection:
+            sql = """
+            CREATE TABLE IF NOT EXISTS public.users
+            (
+                id integer NOT NULL,
+                username text COLLATE pg_catalog."default" NOT NULL,
+                tokens integer,
+                role text COLLATE pg_catalog."default" NOT NULL DEFAULT 'guest'::text,
+                referral integer,
+                free_token_used boolean DEFAULT false,
+                CONSTRAINT users_pkey PRIMARY KEY (id),
+                CONSTRAINT user_referral_fk FOREIGN KEY (referral)
+                    REFERENCES public.users (id) MATCH SIMPLE
+                    ON UPDATE NO ACTION
+                    ON DELETE NO ACTION,
+                CONSTRAINT role_constraint CHECK (role = ANY (ARRAY['admin'::text, 'user'::text, 'guest'::text]))
+            );
+            CREATE TABLE IF NOT EXISTS public.orders
+            (
+                id integer NOT NULL GENERATED ALWAYS AS IDENTITY ( INCREMENT 1 START 1 MINVALUE 1 MAXVALUE 2147483647 CACHE 1 ),
+                user_id integer NOT NULL,
+                label text COLLATE pg_catalog."default" NOT NULL,
+                amount integer NOT NULL DEFAULT 0,
+                confirmed boolean NOT NULL DEFAULT false,
+                CONSTRAINT orders_pkey PRIMARY KEY (id),
+                CONSTRAINT user_id_fk FOREIGN KEY (user_id)
+                    REFERENCES public.users (id) MATCH SIMPLE
+                    ON UPDATE NO ACTION
+                    ON DELETE NO ACTION
+            );
+            """
+            await connection.execute(sql)
+
 
     async def add_user(self, user_id: int, username: str, tokens: int, ref_id: int = None) -> str:
         async with self.pool.acquire() as connection:
