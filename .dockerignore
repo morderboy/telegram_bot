@@ -1,0 +1,7 @@
+logs/
+__pycache__/
+.venv/
+.git/
+.gitignore
+server.py
+payment_server_tests.py
